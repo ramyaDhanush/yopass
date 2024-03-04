@@ -24,7 +24,6 @@ const deleteSecret = async (url: string): Promise<Response> => {
 
 const DeleteSecret = ({ url }: { readonly url: string }) => {
   const { t } = useTranslation();
-
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [open, setOpen] = useState(false);
