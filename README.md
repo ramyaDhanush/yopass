@@ -31,6 +31,7 @@ If you are using yopass and want to support other then by code contributions. Gi
 - [Doddle LTD](https://doddle.com)
 - [Spotify](https://spotify.com)
 - [Gumtree Australia](https://www.gumtreeforbusiness.com.au/)
+
 ## Command-line interface
 
 The main motivation of Yopass is to make it easy for everyone to share secrets easily and quickly via a simple webinterface. Nevertheless, a command-line interface is provided as well to support use cases where the output of a program needs to be shared.
@@ -42,7 +43,7 @@ Yopass - Secure sharing for secrets, passwords and files
 Flags:
       --api string          Yopass API server location (default "https://api.yopass.se")
       --decrypt string      Decrypt secret URL
-      --expiration string   Duration after which secret will be deleted [1h, 1d, 1w] (default "1h")
+      --expiration string   Duration after which secret will be deleted [1h, 1d, 1w, 0] (default "1h", 0 for infinite ttl)
       --file string         Read secret from file instead of stdin
       --key string          Manual encryption/decryption key
       --one-time            One-time download (default true)
@@ -103,12 +104,52 @@ $ yopass-server -h
 
 Encrypted secrets can be stored either in Memcached or Redis by changing the `--database` flag.
 
+## Development
+
+To download go dependencies ( go should be installed)
+
+```
+go mod tidy
+```
+
+To run cli client
+
+```
+cd cmd/yopass
+go build
+./yopass --expiration="0" --one-time=false --api http://localhost:1337  --key "random" --url http://localhost:1337 <<< 'testing'
+```
+
+To run server
+
+```
+cd cmd/yopass-server
+go build
+./yopass-server --database "redis"
+```
+
+To run website 
+
+```
+cd website
+yarn install
+REACT_APP_BACKEND_URL='http://localhost:1337' yarn start
+```
+
+To run DB, using docker
+
+```
+docker run -p 6379:6379 redis
+```
+
 ### Docker Compose
 
 Use the Docker Compose file `deploy/with-nginx-and-letsencrypt/docker-compose.yml` to set up a yopass instance with TLS transport encryption and certificate auto renewal using [Let's Encrypt](https://letsencrypt.org/). First point your domain to the host you want to run yopass on. Then replace the placeholder values for `VIRTUAL_HOST`, `LETSENCRYPT_HOST` and `LETSENCRYPT_EMAIL` in `deploy/with-nginx-and-letsencrypt/docker-compose.yml` with your values. Afterwards change the directory to `deploy/with-nginx-and-letsencrypt` and start the containers with:
+
 ```console
 docker-compose up -d
 ```
+
 Yopass will then be available under the domain you specified through `VIRTUAL_HOST` / `LETSENCRYPT_HOST`.
 
 Advanced users that already have a reverse proxy handling TLS connections can use the `insecure` setup:
@@ -117,6 +158,7 @@ Advanced users that already have a reverse proxy handling TLS connections can us
 cd deploy/docker/compose/insecure
 docker-compose up -d
 ```
+
 Afterwards point your reverse proxy to `127.0.0.1:80`.
 
 ### Docker
@@ -128,6 +170,7 @@ docker run --name memcached_yopass -d memcached
 docker run -p 443:1337 -v /local/certs/:/certs \
     --link memcached_yopass:memcached -d jhaals/yopass --memcached=memcached:11211 --tls-key=/certs/tls.key --tls-cert=/certs/tls.crt
 ```
+
 Afterwards yopass will be available on port 443 through all IP addresses of the host, including public ones. If you want to limit the availability to a specific IP address use `-p` like so: `-p 127.0.0.1:443:1337`.
 
 Without TLS encryption (needs a reverse proxy for transport encryption):
@@ -179,6 +222,7 @@ Supported metrics:
 Yopass has third party support for other languages. That means you can write translations for the language you'd like or use a third party language file. Please note that yopass itself is english only and any other translations are community supported.
 
 Here's a list of available translations:
+
 - [German](https://github.com/Anturix/yopass-german)
 - [French](https://github.com/NicolasStr/yopass-french)
 - [Spanish](https://github.com/nbensa/yopass-spanish)
